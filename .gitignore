@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Logs
+logs/
+*.log
+pino.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+.docker/
+
+# Test coverage
+coverage/
+.nyc_output/
+htmlcov/
+
+# Compiled assets
+*.js.map
+*.d.ts.map
+
+# Secrets (never commit)
+.env
+*.pem
+*.key
+secrets/
