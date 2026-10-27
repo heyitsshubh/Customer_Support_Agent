@@ -5,6 +5,8 @@ import { logger } from './infrastructure/observability/logger.js';
 import { globalErrorHandler } from './interface/errors/GlobalErrorHandler.js';
 import { buildContainer } from './container.js';
 import { healthRoutes } from './interface/modules/health/health.routes.js';
+import { authPlugin } from './interface/plugins/auth.plugin.js';
+import { authRoutes } from './interface/modules/auth/auth.routes.js';
 import { closeSql } from './infrastructure/database/connection.js';
 
 export async function createServer(): Promise<FastifyInstance> {
@@ -22,8 +24,13 @@ export async function createServer(): Promise<FastifyInstance> {
   // Global Error Handler
   app.setErrorHandler(globalErrorHandler);
 
-  // Register Core Health Routes
+  // Register Core Plugins
+  await app.register(authPlugin);
+
+  // Register Routes
   await app.register(healthRoutes);
+  await app.register(authRoutes, { prefix: '/api/v1' });
+
 
   // Graceful shutdown hook
   app.addHook('onClose', async () => {
