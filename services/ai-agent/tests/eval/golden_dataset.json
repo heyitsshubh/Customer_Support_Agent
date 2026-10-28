@@ -1,0 +1,96 @@
+[
+  {
+    "id": "eval_001",
+    "name": "Duplicate Charge - Eligible for Refund",
+    "input": {
+      "customer_id": "sarah.jenkins@example.com",
+      "order_number": "ORD-1042",
+      "message": "I noticed two identical charges of $49.99 on my bank statement for order ORD-1042. Can you please refund the duplicate?"
+    },
+    "expected": {
+      "intent": "billing_dispute",
+      "duplicate_detected": true,
+      "eligible_for_refund": true,
+      "refundable_amount": 49.99,
+      "requires_supervisor_approval": true,
+      "status_at_halt": "pending_approval"
+    }
+  },
+  {
+    "id": "eval_002",
+    "name": "Duplicate Charge - Single Charge Found",
+    "input": {
+      "customer_id": "jordan.lee@example.com",
+      "order_number": "ORD-3180",
+      "message": "Hey, I think I was double charged for order ORD-3180."
+    },
+    "expected": {
+      "intent": "billing_dispute",
+      "duplicate_detected": false,
+      "eligible_for_refund": false,
+      "requires_supervisor_approval": false,
+      "status_at_halt": "completed"
+    }
+  },
+  {
+    "id": "eval_003",
+    "name": "Order Status Tracking Inquiry",
+    "input": {
+      "customer_id": "alex.miller@example.com",
+      "order_number": "ORD-2301",
+      "message": "Where is my order ORD-2301? Has it shipped yet?"
+    },
+    "expected": {
+      "intent": "order_status",
+      "order_found": true,
+      "carrier_provided": true,
+      "tracking_number_provided": true,
+      "requires_supervisor_approval": false,
+      "status_at_halt": "completed"
+    }
+  },
+  {
+    "id": "eval_004",
+    "name": "Return Policy Grounded RAG Query",
+    "input": {
+      "customer_id": "jordan.lee@example.com",
+      "message": "What is your return policy if I want to send an item back?"
+    },
+    "expected": {
+      "intent": "policy_question",
+      "policy_retrieved": "Return and Replacement Policy",
+      "mentions_30_days": true,
+      "requires_supervisor_approval": false,
+      "status_at_halt": "completed"
+    }
+  },
+  {
+    "id": "eval_005",
+    "name": "Carrier Shipping Delays SLA Inquiry",
+    "input": {
+      "customer_id": "sarah.jenkins@example.com",
+      "message": "How long do deliveries usually take via FedEx or UPS?"
+    },
+    "expected": {
+      "intent": "policy_question",
+      "policy_retrieved": "Shipping and Carrier Delays SLA",
+      "mentions_business_days": true,
+      "requires_supervisor_approval": false,
+      "status_at_halt": "completed"
+    }
+  },
+  {
+    "id": "eval_006",
+    "name": "Customer Tier Benefits Question",
+    "input": {
+      "customer_id": "alex.miller@example.com",
+      "message": "What perks do I get as a Silver tier member?"
+    },
+    "expected": {
+      "intent": "policy_question",
+      "policy_retrieved": "Customer Tier SLA Guidelines",
+      "requires_supervisor_approval": false,
+      "status_at_halt": "completed"
+    }
+  }
+]
