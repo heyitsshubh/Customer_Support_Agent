@@ -15,6 +15,8 @@ import { refundsRoutes } from './interface/modules/refunds/refunds.routes.js';
 import { docsRoutes } from './interface/modules/docs/docs.routes.js';
 import { feedbackRoutes } from './interface/modules/feedback/feedback.routes.js';
 import { analyticsRoutes } from './interface/modules/analytics/analytics.routes.js';
+import { adminRoutes } from './interface/modules/admin/admin.routes.js';
+import { experimentsRoutes } from './interface/modules/experiments/experiments.routes.js';
 import { closeSql } from './infrastructure/database/connection.js';
 
 export async function createServer(): Promise<FastifyInstance> {
@@ -46,6 +48,9 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(docsRoutes, { prefix: '/api/v1' });
   await app.register(feedbackRoutes, { prefix: '/api/v1' });
   await app.register(analyticsRoutes, { prefix: '/api/v1' });
+  await app.register(adminRoutes, { prefix: '/api/v1' });
+  await app.register(experimentsRoutes, { prefix: '/api/v1' });
+
 
 
 
