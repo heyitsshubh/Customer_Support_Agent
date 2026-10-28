@@ -9,6 +9,9 @@ import { authPlugin } from './interface/plugins/auth.plugin.js';
 import { authRoutes } from './interface/modules/auth/auth.routes.js';
 import { chatRoutes } from './interface/modules/chat/chat.routes.js';
 import { casesRoutes } from './interface/modules/cases/cases.routes.js';
+import { customersRoutes } from './interface/modules/customers/customers.routes.js';
+import { ordersRoutes } from './interface/modules/orders/orders.routes.js';
+import { refundsRoutes } from './interface/modules/refunds/refunds.routes.js';
 import { closeSql } from './infrastructure/database/connection.js';
 
 export async function createServer(): Promise<FastifyInstance> {
@@ -34,6 +37,10 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(authRoutes, { prefix: '/api/v1' });
   await app.register(chatRoutes, { prefix: '/api/v1' });
   await app.register(casesRoutes, { prefix: '/api/v1' });
+  await app.register(customersRoutes, { prefix: '/api/v1' });
+  await app.register(ordersRoutes, { prefix: '/api/v1' });
+  await app.register(refundsRoutes, { prefix: '/api/v1' });
+
 
 
 
