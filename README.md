@@ -21,26 +21,6 @@
 
 ---
 
-## 📋 Table of Contents
-
-- [Overview](#-overview)
-- [System Architecture](#-system-architecture)
-- [Tech Stack](#-tech-stack)
-- [Key Features](#-key-features)
-- [Project Structure](#-project-structure)
-- [Agent Workflow](#-agent-workflow)
-- [API Reference](#-api-reference)
-- [Quick Start](#-quick-start)
-- [Development Setup](#-development-setup)
-- [Environment Variables](#-environment-variables)
-- [Database Schema](#-database-schema)
-- [Running Tests](#-running-tests)
-- [Observability](#-observability)
-- [Branch Strategy](#-branch-strategy)
-- [Contributing](#-contributing)
-
----
-
 ## 🌟 Overview
 
 **Customer Support Agent** is a full-stack, production-grade system that combines a **Fastify API Gateway** (TypeScript) with a **LangGraph multi-agent AI microservice** (Python) to automatically resolve customer support requests — from billing disputes and duplicate charges to order tracking and refund processing.
