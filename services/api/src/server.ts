@@ -5,6 +5,7 @@ import { logger } from './infrastructure/observability/logger.js';
 import { globalErrorHandler } from './interface/errors/GlobalErrorHandler.js';
 import { buildContainer } from './container.js';
 import { healthRoutes } from './interface/modules/health/health.routes.js';
+import swaggerPlugin from './interface/plugins/swagger.plugin.js';
 import { authPlugin } from './interface/plugins/auth.plugin.js';
 import { authRoutes } from './interface/modules/auth/auth.routes.js';
 import { chatRoutes } from './interface/modules/chat/chat.routes.js';
@@ -13,6 +14,7 @@ import { customersRoutes } from './interface/modules/customers/customers.routes.
 import { ordersRoutes } from './interface/modules/orders/orders.routes.js';
 import { refundsRoutes } from './interface/modules/refunds/refunds.routes.js';
 import { docsRoutes } from './interface/modules/docs/docs.routes.js';
+import { redocRoutes } from './interface/modules/docs/redoc.routes.js';
 import { feedbackRoutes } from './interface/modules/feedback/feedback.routes.js';
 import { analyticsRoutes } from './interface/modules/analytics/analytics.routes.js';
 import { adminRoutes } from './interface/modules/admin/admin.routes.js';
@@ -35,6 +37,7 @@ export async function createServer(): Promise<FastifyInstance> {
   app.setErrorHandler(globalErrorHandler);
 
   // Register Core Plugins
+  await app.register(swaggerPlugin); // ← must be FIRST so all route schemas are captured
   await app.register(authPlugin);
 
   // Register Routes
@@ -50,6 +53,7 @@ export async function createServer(): Promise<FastifyInstance> {
   await app.register(analyticsRoutes, { prefix: '/api/v1' });
   await app.register(adminRoutes, { prefix: '/api/v1' });
   await app.register(experimentsRoutes, { prefix: '/api/v1' });
+  await app.register(redocRoutes);      // serves GET /api/redoc (Redoc portal, no prefix)
 
 
 
@@ -77,6 +81,8 @@ export async function startServer(): Promise<void> {
       host: '0.0.0.0',
     });
     logger.info(`🚀 Fastify API Gateway running at ${address}`);
+    logger.info(`📖 Swagger UI  → ${address}/api/docs`);
+    logger.info(`📚 Redoc Docs  → ${address}/api/redoc`);
   } catch (err) {
     logger.error({ err }, 'Failed to start API Gateway');
     process.exit(1);

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Support Agent — API Reference</title>
+  <meta name="description" content="API documentation for the AI-powered Customer Support Agent system" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>" />
+  <style>
+    body { margin: 0; padding: 0; font-family: system-ui, sans-serif; }
+    #redoc-container { height: 100vh; }
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; flex-direction: column; gap: 16px;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+      color: white;
+    }
+    .loading h2 { font-size: 1.5rem; margin: 0; }
+    .spinner {
+      width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: white; border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <h2>🤖 Loading API Reference…</h2>
+  </div>
+  <div id="redoc-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js"></script>
+  <script>
+    Redoc.init(
+      '/api/docs/json',
+      {
+        theme: {
+          colors: {
+            primary: { main: '#4F46E5' },
+            success: { main: '#16a34a' },
+            warning: { main: '#d97706' },
+            error: { main: '#dc2626' },
+          },
+          typography: {
+            fontSize: '15px',
+            fontFamily: 'Inter, system-ui, sans-serif',
+            headings: { fontFamily: 'Inter, system-ui, sans-serif', fontWeight: '700' },
+            code: { fontSize: '13px', fontFamily: 'JetBrains Mono, Menlo, monospace' },
+          },
+          sidebar: {
+            backgroundColor: '#1e1b4b',
+            textColor: '#e0e7ff',
+            activeTextColor: '#a5b4fc',
+            arrow: { size: '1.5em', color: '#a5b4fc' },
+          },
+          rightPanel: { backgroundColor: '#1e1b4b' },
+        },
+        scrollYOffset: 60,
+        hideDownloadButton: false,
+        expandResponses: '200,201',
+        requiredPropsFirst: true,
+        sortPropsAlphabetically: false,
+        showExtensions: true,
+        nativeScrollbars: false,
+        pathInMiddlePanel: false,
+        untrustedSpec: false,
+      },
+      document.getElementById('redoc-container'),
+      () => {
+        document.getElementById('loading').style.display = 'none';
+      }
+    );
+  </script>
+</body>
+</html>
