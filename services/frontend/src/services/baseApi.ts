@@ -43,20 +43,24 @@ const baseQueryWithReauth: BaseQueryFn<
       );
 
       if (refreshResult.data) {
-        const data = refreshResult.data as {
-          accessToken: string;
-          refreshToken?: string;
-          user?: any;
-        };
-        api.dispatch(
-          setCredentials({
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken || refreshToken,
-            user: data.user || state.auth.user!,
-          })
-        );
-        // Retry original query
-        result = await rawBaseQuery(args, api, extraOptions);
+        const payload = refreshResult.data as any;
+        const accessToken = payload.data?.tokens?.accessToken || payload.accessToken;
+        const newRefreshToken = payload.data?.tokens?.refreshToken || payload.refreshToken || refreshToken;
+        const user = payload.data?.user || payload.user || state.auth.user;
+
+        if (accessToken && user) {
+          api.dispatch(
+            setCredentials({
+              accessToken,
+              refreshToken: newRefreshToken,
+              user,
+            })
+          );
+          // Retry original query
+          result = await rawBaseQuery(args, api, extraOptions);
+        } else {
+          api.dispatch(logout());
+        }
       } else {
         api.dispatch(logout());
       }
