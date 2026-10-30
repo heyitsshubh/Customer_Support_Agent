@@ -3,7 +3,7 @@ import { Card, CardContent, Typography, Box, Skeleton } from '@mui/material';
 
 interface KpiCardProps {
   title: string;
-  value: string | number;
+  value: React.ReactNode;
   subtitle?: string;
   icon: React.ReactNode;
   color?: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info';
