@@ -120,8 +120,10 @@ export interface ChatMessage {
 }
 
 export interface PendingAction {
-  action: string;
-  actionParams: Record<string, any>;
+  action?: string;
+  type?: string;
+  amount?: number;
+  actionParams?: Record<string, any>;
   description?: string;
 }
 
