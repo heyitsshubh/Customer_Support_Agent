@@ -61,6 +61,18 @@ export const chatApi = baseApi.injectEndpoints({
       query: (threadId) => `/chat/${threadId}`,
       providesTags: (_result, _error, threadId) => [{ type: 'Chat', id: threadId }],
     }),
+
+    approveCase: builder.mutation<
+      { success: boolean; data: any },
+      { threadId: string; approved: boolean; notes?: string }
+    >({
+      query: ({ threadId, approved, notes }) => ({
+        url: `/chat/${threadId}/approve`,
+        method: 'POST',
+        body: { approved, notes },
+      }),
+      invalidatesTags: ['Chat', 'Case'],
+    }),
   }),
 });
 
@@ -68,4 +80,5 @@ export const {
   useStartChatMutation,
   useSendMessageMutation,
   useGetChatThreadQuery,
+  useApproveCaseMutation,
 } = chatApi;
