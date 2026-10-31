@@ -1,0 +1,203 @@
+version: "3.9"
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Fastify API Gateway (Node.js + TypeScript)
+  # ----------------------------------------------------------------------------
+  api:
+    build:
+      context: ../services/api
+      dockerfile: Dockerfile
+    container_name: support-api-gateway
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/support_agent
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=production-grade-super-secret-key-32-chars-long!
+      - INTERNAL_SERVICE_TOKEN=internal-agent-secret-token-key-32ch!
+      - AI_SERVICE_URL=http://ai-agent:8001
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_SERVICE_NAME_API=api-gateway
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ai-agent:
+        condition: service_started
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 2. React Frontend (Nginx SPA + Reverse Proxy)
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ../services/frontend
+      dockerfile: Dockerfile
+    container_name: support-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 3. Python AI Microservice (FastAPI + LangGraph)
+  # ----------------------------------------------------------------------------
+  ai-agent:
+    build:
+      context: ../services/ai-agent
+      dockerfile: Dockerfile
+    container_name: support-ai-microservice
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHON_PORT=8001
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@postgres:5432/support_agent
+      - REDIS_URL=redis://redis:6379
+      - INTERNAL_SERVICE_TOKEN=internal-agent-secret-token-key-32ch!
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-placeholder}
+      - OPENAI_CHAT_MODEL=gpt-4o-mini
+      - OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2:-false}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY:-}
+      - LANGCHAIN_PROJECT=customer-support-agent
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_SERVICE_NAME_AI=ai-agent
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 3. PostgreSQL 16 + pgvector
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: support-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=support_agent
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/001_init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d support_agent"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 4. Redis 7
+  # ----------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: support-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 5. OpenTelemetry Collector
+  # ----------------------------------------------------------------------------
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.108.0
+    container_name: support-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "8889:8889" # Prometheus metrics exporter
+    depends_on:
+      - jaeger
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 6. Prometheus
+  # ----------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: support-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 7. Grafana
+  # ----------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.2.0
+    container_name: support-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 8. Jaeger Distributed Tracing
+  # ----------------------------------------------------------------------------
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    container_name: support-jaeger
+    restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686" # Web UI
+    networks:
+      - support-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  support-net:
+    driver: bridge
