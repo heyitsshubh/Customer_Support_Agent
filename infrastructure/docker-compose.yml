@@ -33,6 +33,23 @@ services:
       - support-net
 
   # ----------------------------------------------------------------------------
+  # 2. React Frontend (Nginx SPA + Reverse Proxy)
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: ../services/frontend
+      dockerfile: Dockerfile
+    container_name: support-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - support-net
+
+  # ----------------------------------------------------------------------------
+  # 3. Python AI Microservice (FastAPI + LangGraph)
   # 2. Python AI Microservice (FastAPI + LangGraph)
   # ----------------------------------------------------------------------------
   ai-agent:
