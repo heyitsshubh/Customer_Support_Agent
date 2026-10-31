@@ -50,6 +50,7 @@ services:
 
   # ----------------------------------------------------------------------------
   # 3. Python AI Microservice (FastAPI + LangGraph)
+  # 2. Python AI Microservice (FastAPI + LangGraph)
   # ----------------------------------------------------------------------------
   ai-agent:
     build:
